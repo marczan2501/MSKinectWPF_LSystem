@@ -37,16 +37,8 @@ namespace MSKinectWPF_LSystem
 
             foreach (var elt in str)
             {
-                if (tbl.ContainsKey(elt))
-                {
-                    sb.Append(tbl[elt]);
-                }
-
-                else
-                {
-                    sb.Append(elt);
-                }
-
+                if (tbl.ContainsKey(elt)) sb.Append(tbl[elt]); 
+                else sb.Append(elt);  
             }
             return sb.ToString();
         }
@@ -80,21 +72,16 @@ namespace MSKinectWPF_LSystem
             tbl.Add('G', Gstring);
 
             for (var i = 0; i < levels; i++) str = Rewrite(tbl, str);
-
-
-            var sizeGrowth = 0.0001;
-            var angleGrowth = -0.055313;
-
+                                                                 
             State state;
 
-            var lines = new List<Point>();
-
+            var lines = new List<Point>();     
             var pen = new Pen(new SolidColorBrush(Colors.Black), 0.25);
-
-            var geometryGroup = new GeometryGroup();
-
+            var geometryGroup = new GeometryGroup();       
             var initAngle = -3669.39;
             var initSize = 9.0;
+            var sizeGrowth = 0.0001;
+            var angleGrowth = -0.055313;
 
             Action buildLines = () =>
             {
@@ -422,8 +409,6 @@ namespace MSKinectWPF_LSystem
             }
             else aktywne = false;
         }
-
-
         void ShowCircles()
         {
             ellipseHead.Visibility = Visibility.Visible;

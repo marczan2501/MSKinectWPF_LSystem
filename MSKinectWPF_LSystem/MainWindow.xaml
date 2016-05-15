@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MSKinectWPF_LSystem"
         mc:Ignorable="d"
-        Title="MainWindow" Height="800" Width="1440">
+        Title="MS Kinect" 
+        Height="800" Width="1440">
     <Grid>
         <Grid.ColumnDefinitions>
             <!--Lewa strona obraz-->
