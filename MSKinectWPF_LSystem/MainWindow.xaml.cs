@@ -85,8 +85,7 @@ namespace MSKinectWPF_LSystem
 
             Action buildLines = () =>
             {
-                lines.Clear();
-
+                lines.Clear();    
                 state = new State()
                 {
                     x = 400,
@@ -139,18 +138,10 @@ namespace MSKinectWPF_LSystem
                         var a = lines[i];
                         var b = lines[i + 1];
 
-                        mapabitowa.DrawLine(
-                            (int)a.X, (int)a.Y, (int)b.X, (int)b.Y,
-                            Colors.Blue);
+                        mapabitowa.DrawLine((int)a.X, (int)a.Y, (int)b.X, (int)b.Y, Colors.Blue);
                     }
                 }
-            };
-            MouseDown += (s, e) =>
-            {
-                angleGrowth += 0.0001;
-                buildLines();
-                updateBitmap();
-            };
+            }; 
             KeyDown += (s, e) =>
             {
                 if (Keyboard.IsKeyDown(Key.Q))
@@ -180,54 +171,8 @@ namespace MSKinectWPF_LSystem
                     roz.Content = ("Size: " + initAngle);
                     buildLines();
                     updateBitmap();
-                }
-
-                else if (Keyboard.IsKeyDown(Key.D1))
-                {
-                    //tree horse
-                    Lstring = "|-S!L!Y";
-                    Sstring = "[F[FF-YS]F)G]+";
-                    Ystring = "--[F-)<F-FG]-";
-                    Gstring = "FGF[Y+>F]+Y";
-                    levels = 12;
-                    sizeGrowth = -1.359672;
-                    angleGrowth = -0.138235;
-                    initSize = 14.11;
-                    initAngle = -3963.7485;
-                    kat.Content = ("Angle: " + angleGrowth);
-                    roz.Content = ("Size: " + initAngle);
-                    lText.Content = ("L: " + Lstring);
-                    sText.Content = ("S: " + Sstring);
-                    yText.Content = ("Y: " + Ystring);
-                    gText.Content = ("G: " + Gstring);
-                    levelsText.Content = ("levels: " + levels);
-                    buildLines();
-                    updateBitmap();
-                }
-                else if (Keyboard.IsKeyDown(Key.D2))
-                {
-                    //Pollenate
-                    Lstring = "S";
-                    Sstring = "F+>[F-Y[S]]F)G";
-                    Ystring = "--[|F-F-FY]";
-                    Gstring = "FGY[+F]+Y";
-                    levels = 30;
-                    sizeGrowth = 0.0001;
-                    angleGrowth = -0.05531299999999828;
-                    initSize = 9.0;
-                    initAngle = -3669.39;
-                    kat.Content = ("Angle: " + angleGrowth);
-                    roz.Content = ("Size: " + initAngle);
-                    lText.Content = ("L: " + Lstring);
-                    sText.Content = ("S: " + Sstring);
-                    yText.Content = ("Y: " + Ystring);
-                    gText.Content = ("G: " + Gstring);
-                    levelsText.Content = ("levels: " + levels);
-                    buildLines();
-                    updateBitmap();
-                }
-            };
-
+                }        
+            };               
             buildLines();
             updateBitmap();
         }

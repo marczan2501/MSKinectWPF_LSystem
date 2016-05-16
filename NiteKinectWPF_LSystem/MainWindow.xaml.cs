@@ -36,16 +36,8 @@ namespace NiteKinectWPF_LSystem
 
             foreach (var elt in str)
             {
-                if (tbl.ContainsKey(elt))
-                {
-                    sb.Append(tbl[elt]);
-                }
-
-                else
-                {
-                    sb.Append(elt);
-                }
-
+                if (tbl.ContainsKey(elt)) sb.Append(tbl[elt]);
+                else  sb.Append(elt);
             }
             return sb.ToString();
         }
@@ -72,21 +64,16 @@ namespace NiteKinectWPF_LSystem
             tbl.Add('G', Gstring);
 
             for (var i = 0; i < levels; i++) str = Rewrite(tbl, str);
-
-
-            var sizeGrowth = 0.0001;
-            var angleGrowth = -0.055313;
-
+                                        
             State state;
 
-            var lines = new List<Point>();
-
-            var pen = new Pen(new SolidColorBrush(Colors.Black), 0.25);
-
-            var geometryGroup = new GeometryGroup();
-
+            var lines = new List<Point>();  
+            var pen = new Pen(new SolidColorBrush(Colors.Black), 0.25); 
+            var geometryGroup = new GeometryGroup();               
             var initAngle = -3669.39;
             var initSize = 9.0;
+            var sizeGrowth = 0.0001;
+            var angleGrowth = -0.055313;
 
             Action buildLines = () =>
             {
@@ -144,18 +131,10 @@ namespace NiteKinectWPF_LSystem
                         var a = lines[i];
                         var b = lines[i + 1];
 
-                        mapabitowa.DrawLine(
-                            (int)a.X, (int)a.Y, (int)b.X, (int)b.Y,
-                            Colors.Blue);
+                        mapabitowa.DrawLine((int)a.X, (int)a.Y, (int)b.X, (int)b.Y, Colors.Blue);
                     }
                 }
-            };
-            MouseDown += (s, e) =>
-            {
-                angleGrowth += 0.0001;
-                buildLines();
-                updateBitmap();
-            };
+            }; 
             KeyDown += (s, e) =>
             {
                 if (Keyboard.IsKeyDown(Key.Q))

@@ -36,16 +36,8 @@ namespace OpenNIKinectWPF_LSystem
 
             foreach (var elt in str)
             {
-                if (tbl.ContainsKey(elt))
-                {
-                    sb.Append(tbl[elt]);
-                }
-
-                else
-                {
-                    sb.Append(elt);
-                }
-
+                if (tbl.ContainsKey(elt)) sb.Append(tbl[elt]);
+                else sb.Append(elt);
             }
             return sb.ToString();
         }
@@ -72,26 +64,20 @@ namespace OpenNIKinectWPF_LSystem
             tbl.Add('G', Gstring);
 
             for (var i = 0; i < levels; i++) str = Rewrite(tbl, str);
+                                                                  
+            State state;
 
-
+            var lines = new List<Point>();                      
+            var pen = new Pen(new SolidColorBrush(Colors.Black), 0.25);
+            var geometryGroup = new GeometryGroup();
+            var initAngle = -3669.39;
+            var initSize = 9.0;
             var sizeGrowth = 0.0001;
             var angleGrowth = -0.055313;
 
-            State state;
-
-            var lines = new List<Point>();
-
-            var pen = new Pen(new SolidColorBrush(Colors.Black), 0.25);
-
-            var geometryGroup = new GeometryGroup();
-
-            var initAngle = -3669.39;
-            var initSize = 9.0;
-
             Action buildLines = () =>
             {
-                lines.Clear();
-
+                lines.Clear();   
                 state = new State()
                 {
                     x = 400,
@@ -144,18 +130,10 @@ namespace OpenNIKinectWPF_LSystem
                         var a = lines[i];
                         var b = lines[i + 1];
 
-                        mapabitowa.DrawLine(
-                            (int)a.X, (int)a.Y, (int)b.X, (int)b.Y,
-                            Colors.Blue);
+                        mapabitowa.DrawLine((int)a.X, (int)a.Y, (int)b.X, (int)b.Y, Colors.Blue);
                     }
                 }
-            };
-            MouseDown += (s, e) =>
-            {
-                angleGrowth += 0.0001;
-                buildLines();
-                updateBitmap();
-            };
+            };               
             KeyDown += (s, e) =>
             {
                 if (Keyboard.IsKeyDown(Key.Q))
@@ -185,54 +163,8 @@ namespace OpenNIKinectWPF_LSystem
                     roz.Content = ("Size: " + initAngle);
                     buildLines();
                     updateBitmap();
-                }
-
-                else if (Keyboard.IsKeyDown(Key.D1))
-                {
-                    //tree horse
-                    Lstring = "|-S!L!Y";
-                    Sstring = "[F[FF-YS]F)G]+";
-                    Ystring = "--[F-)<F-FG]-";
-                    Gstring = "FGF[Y+>F]+Y";
-                    levels = 12;
-                    sizeGrowth = -1.359672;
-                    angleGrowth = -0.138235;
-                    initSize = 14.11;
-                    initAngle = -3963.7485;
-                    kat.Content = ("Angle: " + angleGrowth);
-                    roz.Content = ("Size: " + initAngle);
-                    lText.Content = ("L: " + Lstring);
-                    sText.Content = ("S: " + Sstring);
-                    yText.Content = ("Y: " + Ystring);
-                    gText.Content = ("G: " + Gstring);
-                    levelsText.Content = ("levels: " + levels);
-                    buildLines();
-                    updateBitmap();
-                }
-                else if (Keyboard.IsKeyDown(Key.D2))
-                {
-                    //Pollenate
-                    Lstring = "S";
-                    Sstring = "F+>[F-Y[S]]F)G";
-                    Ystring = "--[|F-F-FY]";
-                    Gstring = "FGY[+F]+Y";
-                    levels = 30;
-                    sizeGrowth = 0.0001;
-                    angleGrowth = -0.05531299999999828;
-                    initSize = 9.0;
-                    initAngle = -3669.39;
-                    kat.Content = ("Angle: " + angleGrowth);
-                    roz.Content = ("Size: " + initAngle);
-                    lText.Content = ("L: " + Lstring);
-                    sText.Content = ("S: " + Sstring);
-                    yText.Content = ("Y: " + Ystring);
-                    gText.Content = ("G: " + Gstring);
-                    levelsText.Content = ("levels: " + levels);
-                    buildLines();
-                    updateBitmap();
-                }
-            };
-
+                }   
+            };      
             buildLines();
             updateBitmap();
         }
