@@ -30,26 +30,13 @@
                 <Ellipse Name="ellipseRightFoot" Fill="Red" Height="20" Width="20" Stroke="White" />
             </Canvas>
             <Grid Grid.Row="1">
-                <Grid.ColumnDefinitions>
-                    <!--Lewa strona na opcje-->
-                    <ColumnDefinition Width="*"/>
-                    <!--Lewa strona na opcje-->
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <Button Content="Ustaw kąt" Height="34" HorizontalAlignment="Left" Name="bSetTilt" VerticalAlignment="Top" Width="75" Click="bSetTilt_Click" Grid.Column="0" Margin="10,195,0,0"/>
-                <Label Content="0" HorizontalAlignment="Left" Name="lTiltValue" VerticalAlignment="Top" Width="40" Height="35" FontSize="21.333" Grid.Column="0" Margin="270,195,0,0"/>
-                <DockPanel VerticalAlignment="Center" Margin="10,235,10,10" Grid.Column="0" >
-                    <TextBox Text="{Binding ElementName=sSetTilt, Path=Value, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Right" TextAlignment="Right" Width="40" Height="35" FontSize="21.333" />
-                    <Slider DockPanel.Dock="Left" Height="30" HorizontalAlignment="Left" Name="sSetTilt" VerticalAlignment="Top" Width="255" Orientation="Horizontal" Maximum="27" Minimum="-27" TickPlacement="BottomRight" TickFrequency="1" IsSnapToTickEnabled="True" Cursor="Hand"/>
-                </DockPanel>
 
-                <Label Content="size" HorizontalAlignment="Left" Name="roz" VerticalAlignment="Top" Height="35" FontSize="16" Grid.Column="1" Margin="10,10,0,0" Width="300"/>
-                <Label Content="angle" HorizontalAlignment="Left" Name="kat" VerticalAlignment="Top" Width="300" Height="35" FontSize="16" Grid.Column="1" Margin="10,50,0,0" />
-                <Label Content="lText" HorizontalAlignment="Left" Name="lText" VerticalAlignment="Top" Width="300" Height="35" FontSize="16" Grid.Column="1" Margin="10,90,0,0" />
-                <Label Content="sText" HorizontalAlignment="Left" Name="sText" VerticalAlignment="Top" Width="300" Height="35" FontSize="16" Grid.Column="1" Margin="10,130,0,0" />
-                <Label Content="yText" HorizontalAlignment="Left" Name="yText" VerticalAlignment="Top" Width="300" Height="35" FontSize="16" Grid.Column="1" Margin="10,170,0,0" />
-                <Label Content="gText" HorizontalAlignment="Left" Name="gText" VerticalAlignment="Top" Width="300" Height="35" FontSize="16" Grid.Column="1" Margin="10,210,0,0" />
-                <Label Content="levelsText" HorizontalAlignment="Left" Name="levelsText" VerticalAlignment="Top" Width="300" Height="35" FontSize="16" Grid.Column="1" Margin="10,250,0,0" />
+                <Button Content="Ustaw kąt" Height="34" HorizontalAlignment="Left" Name="bSetTilt" VerticalAlignment="Top" Width="75" Click="bSetTilt_Click" Margin="10,10,0,0"/>
+                <Label Content="0" HorizontalAlignment="Left" Name="lTiltValue" VerticalAlignment="Top" Width="40" Height="35" FontSize="21.333" Margin="270,9,0,0"/>
+                <DockPanel VerticalAlignment="Center" Margin="10,49,330,151" Height="80" >
+                    <TextBox Text="{Binding ElementName=sSetTilt, Path=Value, UpdateSourceTrigger=PropertyChanged}" DockPanel.Dock="Right" TextAlignment="Left" Width="40" Height="35" FontSize="21.333" />
+                    <Slider DockPanel.Dock="Left" Height="36" HorizontalAlignment="Left" Name="sSetTilt" VerticalAlignment="Center" Width="255" Orientation="Horizontal" Maximum="27" Minimum="-27" TickPlacement="BottomRight" TickFrequency="1" IsSnapToTickEnabled="True" Cursor="Hand" Margin="0,22"/>
+                </DockPanel>
             </Grid>
         </Grid>
         <Image Name="lsystem" Width="800" Height="800" Grid.Column="1"/>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿#region Usings
+using System;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -9,9 +10,11 @@ using System.Windows.Shapes;
 using Microsoft.Kinect;
 using System.Collections.Generic;
 using System.Text;
-
+using MSKinectWPF_LSystem.PageObjects;
+#endregion
 namespace MSKinectWPF_LSystem
 {
+    #region L-System
     class DrawingVisualElement : FrameworkElement
     {
         public DrawingVisual visual;
@@ -29,163 +32,141 @@ namespace MSKinectWPF_LSystem
 
         public State Clone() { return (State)this.MemberwiseClone(); }
     }
+    #endregion
     public partial class MainWindow : Window
     {
+        #region L-System
         static string Rewrite(Dictionary<char, string> tbl, string str)
         {
             var sb = new StringBuilder();
 
             foreach (var elt in str)
             {
-                if (tbl.ContainsKey(elt)) sb.Append(tbl[elt]); 
-                else sb.Append(elt);  
+                if (tbl.ContainsKey(elt)) sb.Append(tbl[elt]);
+                else sb.Append(elt);
             }
             return sb.ToString();
         }
+        static void buildLines(Stack<State> states, List<Point> lines)
+        {
+            lines.Clear();
+            State state = new State()
+            {
+                x = 400,
+                y = 400,
+                dir = 0,
+                size = ObjectRepository.PagePoroze.initSize,
+                angle = ObjectRepository.PagePoroze.initAngle
+            };
+
+            foreach (var elt in ObjectRepository.MainPage.str)
+            {
+                if (elt == 'F')
+                {
+                    var new_x = state.x + state.size * Math.Cos(state.dir * Math.PI / 180.0);
+                    var new_y = state.y + state.size * Math.Sin(state.dir * Math.PI / 180.0);
+
+                    lines.Add(new Point(state.x, state.y));
+                    lines.Add(new Point(new_x, new_y));
+
+                    state.x = new_x;
+                    state.y = new_y;
+                }
+                else if (elt == '+') state.dir += state.angle;
+                else if (elt == '-') state.dir -= state.angle;
+                else if (elt == '>') state.size *= (1.0 - ObjectRepository.PagePoroze.sizeGrowth);
+                else if (elt == '<') state.size *= (1.0 + ObjectRepository.PagePoroze.sizeGrowth);
+                else if (elt == ')') state.angle *= (1 + ObjectRepository.PagePoroze.angleGrowth);
+                else if (elt == '(') state.angle *= (1 - ObjectRepository.PagePoroze.angleGrowth);
+                else if (elt == '[') states.Push(state.Clone());
+                else if (elt == ']') state = states.Pop();
+                else if (elt == '!') state.angle *= -1.0;
+                else if (elt == '|') state.dir += 180.0;
+            }
+        }
+        static void updateBitmap(WriteableBitmap mapabitowa, List<Point> lines)
+        {
+            using (mapabitowa.GetBitmapContext())
+            {
+                mapabitowa.Clear();
+
+                for (var i = 0; i < lines.Count; i += 2)
+                {
+                    var a = lines[i];
+                    var b = lines[i + 1];
+
+                    mapabitowa.DrawLine((int)a.X, (int)a.Y, (int)b.X, (int)b.Y, Colors.SteelBlue);
+                }
+            }
+        }
+        #endregion
+        #region Kinect
         KinectSensor sensor;
         byte[] colorBytes;
         Skeleton[] skeletons;
         SolidColorBrush inactiveBrush = new SolidColorBrush(Colors.Red);
         public int nachylenie = -9;
-
+        #endregion
         public MainWindow()
         {
             InitializeComponent();
             Loaded += new RoutedEventHandler(MainWindow_Loaded);
 
+            #region L-system
             var mapabitowa = BitmapFactory.New(800, 800);
             lsystem.Source = mapabitowa;
-            var states = new Stack<State>();
 
-            var str = "L";
-            int levels = 30;
-            string Lstring = "S";
-            string Sstring = "F+>[F-Y[S]]F)G";
-            string Ystring = "--[|F-F-FY]";
-            string Gstring = "FGY[+F]+Y";
 
-            var tbl = new Dictionary<char, string>();
+            ObjectRepository.MainPage.tbl.Add('L', ObjectRepository.PagePoroze.Lstring);
+            ObjectRepository.MainPage.tbl.Add('S', ObjectRepository.PagePoroze.Sstring);
+            ObjectRepository.MainPage.tbl.Add('Y', ObjectRepository.PagePoroze.Ystring);
+            ObjectRepository.MainPage.tbl.Add('G', ObjectRepository.PagePoroze.Gstring);
 
-            tbl.Add('L', Lstring);
-            tbl.Add('S', Sstring);
-            tbl.Add('Y', Ystring);
-            tbl.Add('G', Gstring);
+            for (var i = 0; i < ObjectRepository.PagePoroze.levels; i++) ObjectRepository.MainPage.str = Rewrite(ObjectRepository.MainPage.tbl, ObjectRepository.MainPage.str);
 
-            for (var i = 0; i < levels; i++) str = Rewrite(tbl, str);
-                                                                 
-            State state;
+            buildLines(ObjectRepository.MainPage.states, ObjectRepository.MainPage.lines);
+            updateBitmap(mapabitowa, ObjectRepository.MainPage.lines);
 
-            var lines = new List<Point>();     
-            var pen = new Pen(new SolidColorBrush(Colors.Black), 0.25);
-            var geometryGroup = new GeometryGroup();       
-            var initAngle = -3669.39;
-            var initSize = 9.0;
-            var sizeGrowth = 0.0001;
-            var angleGrowth = -0.055313;
-
-            Action buildLines = () =>
-            {
-                lines.Clear();    
-                state = new State()
-                {
-                    x = 400,
-                    y = 400,
-                    dir = 0,
-                    size = initSize,
-                    angle = initAngle
-                };
-
-                foreach (var elt in str)
-                {
-                    if (elt == 'F')
-                    {
-                        var new_x = state.x + state.size * Math.Cos(state.dir * Math.PI / 180.0);
-                        var new_y = state.y + state.size * Math.Sin(state.dir * Math.PI / 180.0);
-
-                        lines.Add(new Point(state.x, state.y));
-                        lines.Add(new Point(new_x, new_y));
-
-                        state.x = new_x;
-                        state.y = new_y;
-                    }
-                    else if (elt == '+') state.dir += state.angle;
-                    else if (elt == '-') state.dir -= state.angle;
-                    else if (elt == '>') state.size *= (1.0 - sizeGrowth);
-                    else if (elt == '<') state.size *= (1.0 + sizeGrowth);
-                    else if (elt == ')') state.angle *= (1 + angleGrowth);
-                    else if (elt == '(') state.angle *= (1 - angleGrowth);
-                    else if (elt == '[') states.Push(state.Clone());
-                    else if (elt == ']') state = states.Pop();
-                    else if (elt == '!') state.angle *= -1.0;
-                    else if (elt == '|') state.dir += 180.0;
-                }
-            };
-            kat.Content = ("Angle: " + angleGrowth);
-            roz.Content = ("Size: " + initAngle);
-            lText.Content = ("L: " + Lstring);
-            sText.Content = ("S: " + Sstring);
-            yText.Content = ("Y: " + Ystring);
-            gText.Content = ("G: " + Gstring);
-            levelsText.Content = ("levels: " + levels);
-            Action updateBitmap = () =>
-            {
-                using (mapabitowa.GetBitmapContext())
-                {
-                    mapabitowa.Clear();
-
-                    for (var i = 0; i < lines.Count; i += 2)
-                    {
-                        var a = lines[i];
-                        var b = lines[i + 1];
-
-                        mapabitowa.DrawLine((int)a.X, (int)a.Y, (int)b.X, (int)b.Y, Colors.Blue);
-                    }
-                }
-            }; 
             KeyDown += (s, e) =>
             {
-                if (Keyboard.IsKeyDown(Key.Q))
+                if (Keyboard.IsKeyDown(Key.W) || Keyboard.IsKeyDown(Key.Up))
                 {
-                    angleGrowth += 0.0001;
-                    kat.Content = ("Angle: " + angleGrowth);
-                    buildLines();
-                    updateBitmap();
+                    ObjectRepository.PagePoroze.angleGrowth += 0.0001;
+                    buildLines(ObjectRepository.MainPage.states, ObjectRepository.MainPage.lines);
+                    updateBitmap(mapabitowa, ObjectRepository.MainPage.lines);
                 }
-                else if (Keyboard.IsKeyDown(Key.A))
+                else if (Keyboard.IsKeyDown(Key.S) || Keyboard.IsKeyDown(Key.Down))
                 {
-                    angleGrowth -= 0.0001;
-                    kat.Content = ("Angle: " + angleGrowth);
-                    buildLines();
-                    updateBitmap();
+                    ObjectRepository.PagePoroze.angleGrowth -= 0.0001;
+                    buildLines(ObjectRepository.MainPage.states, ObjectRepository.MainPage.lines);
+                    updateBitmap(mapabitowa, ObjectRepository.MainPage.lines);
                 }
-                else if (Keyboard.IsKeyDown(Key.W))
+                else if (Keyboard.IsKeyDown(Key.A) || Keyboard.IsKeyDown(Key.Left))
                 {
-                    initAngle += 0.2;
-                    roz.Content = ("Size: " + initAngle);
-                    buildLines();
-                    updateBitmap();
+                    ObjectRepository.PagePoroze.initAngle += 0.2;
+                    buildLines(ObjectRepository.MainPage.states, ObjectRepository.MainPage.lines);
+                    updateBitmap(mapabitowa, ObjectRepository.MainPage.lines);
                 }
-                else if (Keyboard.IsKeyDown(Key.S))
+                else if (Keyboard.IsKeyDown(Key.D) || Keyboard.IsKeyDown(Key.Right))
                 {
-                    initAngle -= 0.2;
-                    roz.Content = ("Size: " + initAngle);
-                    buildLines();
-                    updateBitmap();
-                }        
-            };               
-            buildLines();
-            updateBitmap();
+                    ObjectRepository.PagePoroze.initAngle -= 0.2;
+                    buildLines(ObjectRepository.MainPage.states, ObjectRepository.MainPage.lines);
+                    updateBitmap(mapabitowa, ObjectRepository.MainPage.lines);
+                }
+            };
+
+            #endregion
         }
+        #region Kinect
         void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             sensor = KinectSensor.KinectSensors.FirstOrDefault();
 
             if (sensor == null)
             {
-                MessageBox.Show("Aplikacja wymaga Kinecta.");
-                this.Close();
+                MessageBox.Show("Aplikacja wymaga Kinect'a.");
+                Close();
             }
-
             sensor.Start();
 
             sensor.ColorStream.Enable(ColorImageFormat.RgbResolution640x480Fps30);
@@ -207,6 +188,11 @@ namespace MSKinectWPF_LSystem
                 sensor.ElevationAngle = (int)sSetTilt.Value;
                 lTiltValue.Content = sensor.ElevationAngle.ToString();
             }
+            else
+            {
+                MessageBox.Show("Aplikacja wymaga Kinecta.");
+                Close();
+            }
         }
         void Current_Exit(object sender, ExitEventArgs e)
         {
@@ -216,6 +202,11 @@ namespace MSKinectWPF_LSystem
                 sensor.Stop();
                 sensor.Dispose();
                 sensor = null;
+            }
+            else
+            {
+                MessageBox.Show("Aplikacja wymaga Kinecta.");
+                Close();
             }
         }
         void sensor_ColorFrameReady(object sender, ColorImageFrameReadyEventArgs e)
@@ -312,47 +303,25 @@ namespace MSKinectWPF_LSystem
         }
         private void ProcessFractalAngle(Joint head, Joint rightHand, Joint leftHand, Joint leftFoot, Joint rightFoot)
         {
-            bool aktywne = false;
-
             if (rightHand.Position.X > head.Position.X + 0.45)
             {
-                if (!aktywne)
-                {
-                    aktywne = true;
-                    System.Windows.Forms.SendKeys.SendWait("Q");
-                }
+                System.Windows.Forms.SendKeys.SendWait("W");
             }
-            else aktywne = false;
 
             if (leftHand.Position.X < head.Position.X - 0.45)
             {
-                if (!aktywne)
-                {
-                    aktywne = true;
-                    System.Windows.Forms.SendKeys.SendWait("A");
-                }
+                System.Windows.Forms.SendKeys.SendWait("S");
             }
-            else aktywne = false;
 
             if (rightFoot.Position.X > head.Position.X + 0.45)
             {
-                if (!aktywne)
-                {
-                    aktywne = true;
-                    System.Windows.Forms.SendKeys.SendWait("W");
-                }
+                System.Windows.Forms.SendKeys.SendWait("A");
             }
-            else aktywne = false;
 
             if (leftFoot.Position.X < head.Position.X - 0.45)
             {
-                if (!aktywne)
-                {
-                    aktywne = true;
-                    System.Windows.Forms.SendKeys.SendWait("S");
-                }
+                System.Windows.Forms.SendKeys.SendWait("D");
             }
-            else aktywne = false;
         }
         void ShowCircles()
         {
@@ -362,6 +331,6 @@ namespace MSKinectWPF_LSystem
             ellipseRightFoot.Visibility = Visibility.Visible;
             ellipseLeftFoot.Visibility = Visibility.Visible;
         }
+        #endregion
     }
 }
-

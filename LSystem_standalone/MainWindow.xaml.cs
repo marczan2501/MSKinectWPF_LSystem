@@ -5,6 +5,7 @@ using System.Windows.Media;
 using System.Collections.Generic;
 using System.Text;
 using System.Windows.Media.Imaging;
+using LSystem_standalone.PageObjects;
 
 namespace LSystem_standalone
 {
@@ -25,6 +26,7 @@ namespace LSystem_standalone
 
         public State Clone() { return (State)this.MemberwiseClone(); }
     }
+    
     public partial class MainWindow : Window
     {
         static string Rewrite(Dictionary<char, string> tbl, string str)
@@ -38,125 +40,104 @@ namespace LSystem_standalone
             }
             return sb.ToString();
         }
+        static void buildLines(Stack<State> states, List<Point> lines)
+        {
+            lines.Clear();
+            State state = new State()
+            {
+                x = 400,
+                y = 400,
+                dir = 0,
+                size = ObjectRepository.PagePoroze.initSize,
+                angle = ObjectRepository.PagePoroze.initAngle
+            };
+
+            foreach (var elt in ObjectRepository.MainPage.str)
+            {
+                if (elt == 'F')
+                {
+                    var new_x = state.x + state.size * Math.Cos(state.dir * Math.PI / 180.0);
+                    var new_y = state.y + state.size * Math.Sin(state.dir * Math.PI / 180.0);
+
+                    lines.Add(new Point(state.x, state.y));
+                    lines.Add(new Point(new_x, new_y));
+
+                    state.x = new_x;
+                    state.y = new_y;
+                }
+                else if (elt == '+') state.dir += state.angle;
+                else if (elt == '-') state.dir -= state.angle;
+                else if (elt == '>') state.size *= (1.0 - ObjectRepository.PagePoroze.sizeGrowth);
+                else if (elt == '<') state.size *= (1.0 + ObjectRepository.PagePoroze.sizeGrowth);
+                else if (elt == ')') state.angle *= (1 + ObjectRepository.PagePoroze.angleGrowth);
+                else if (elt == '(') state.angle *= (1 - ObjectRepository.PagePoroze.angleGrowth);
+                else if (elt == '[') states.Push(state.Clone());
+                else if (elt == ']') state = states.Pop();
+                else if (elt == '!') state.angle *= -1.0;
+                else if (elt == '|') state.dir += 180.0;
+            }
+        }
+        static void updateBitmap(WriteableBitmap mapabitowa, List<Point> lines)
+        {
+            using (mapabitowa.GetBitmapContext())
+            {
+                mapabitowa.Clear();
+
+                for (var i = 0; i < lines.Count; i += 2)
+                {
+                    var a = lines[i];
+                    var b = lines[i + 1];
+
+                    mapabitowa.DrawLine((int)a.X, (int)a.Y, (int)b.X, (int)b.Y, Colors.SteelBlue);
+                }
+            }
+        }
+
         public MainWindow()
         {
             InitializeComponent();
+         
             var mapabitowa = BitmapFactory.New(800, 800);
             lsystem.Source = mapabitowa;
-            var states = new Stack<State>();
 
-            var str = "L";
-            int levels = 4;
-            string Lstring = "S";
-            string Sstring = "F+S";
-            //string Ystring = "--[|F-F-FY]";
-            // Gstring = "FGY[+F]+Y";
 
-            var tbl = new Dictionary<char, string>();
 
-            tbl.Add('L', Lstring);
-            tbl.Add('S', Sstring);
-           // tbl.Add('Y', Ystring);
-           // tbl.Add('G', Gstring);
+            ObjectRepository.MainPage.tbl.Add('L', ObjectRepository.PagePoroze.Lstring);
+            ObjectRepository.MainPage.tbl.Add('S', ObjectRepository.PagePoroze.Sstring);
+            ObjectRepository.MainPage.tbl.Add('Y', ObjectRepository.PagePoroze.Ystring);
+            ObjectRepository.MainPage.tbl.Add('G', ObjectRepository.PagePoroze.Gstring);
 
-            for (var i = 0; i < levels; i++) str = Rewrite(tbl, str);
+            for (var i = 0; i < ObjectRepository.PagePoroze.levels; i++) ObjectRepository.MainPage.str = Rewrite(ObjectRepository.MainPage.tbl, ObjectRepository.MainPage.str);
 
-            State state;
-
-            var lines = new List<Point>();
-            var pen = new Pen(new SolidColorBrush(Colors.Black), 0.25);
-            var geometryGroup = new GeometryGroup();
-            var initAngle = -3669.39;
-            var initSize = 9.0;
-            var sizeGrowth = 0.0001;
-            var angleGrowth = -0.055313;
-
-            Action buildLines = () =>
-            {
-                lines.Clear();
-                state = new State()
-                {
-                    x = 400,
-                    y = 400,
-                    dir = 0,
-                    size = initSize,
-                    angle = initAngle
-                };
-
-                foreach (var elt in str)
-                {
-                    if (elt == 'F')
-                    {
-                        var new_x = state.x + state.size * Math.Cos(state.dir * Math.PI / 180.0);
-                        var new_y = state.y + state.size * Math.Sin(state.dir * Math.PI / 180.0);
-
-                        lines.Add(new Point(state.x, state.y));
-                        lines.Add(new Point(new_x, new_y));
-
-                        state.x = new_x;
-                        state.y = new_y;
-                    }
-                    else if (elt == '+') state.dir += state.angle;
-                    else if (elt == '-') state.dir -= state.angle;
-                    else if (elt == '>') state.size *= (1.0 - sizeGrowth);
-                    else if (elt == '<') state.size *= (1.0 + sizeGrowth);
-                    else if (elt == ')') state.angle *= (1 + angleGrowth);
-                    else if (elt == '(') state.angle *= (1 - angleGrowth);
-                    else if (elt == '[') states.Push(state.Clone());
-                    else if (elt == ']') state = states.Pop();
-                    else if (elt == '!') state.angle *= -1.0;
-                    else if (elt == '|') state.dir += 180.0;
-                }
-            };
-            
-            Action updateBitmap = () =>
-            {
-                using (mapabitowa.GetBitmapContext())
-                {
-                    mapabitowa.Clear();
-
-                    for (var i = 0; i < lines.Count; i += 2)
-                    {
-                        var a = lines[i];
-                        var b = lines[i + 1];
-
-                        mapabitowa.DrawLine((int)a.X, (int)a.Y, (int)b.X, (int)b.Y, Colors.Blue);
-                    }
-                }
-            };
-            KeyDown += (s, e) =>
+            buildLines(ObjectRepository.MainPage.states, ObjectRepository.MainPage.lines);
+            updateBitmap(mapabitowa, ObjectRepository.MainPage.lines);
+            KeyDown += (sender, e) =>
             {
                 if (Keyboard.IsKeyDown(Key.Q))
                 {
-                    angleGrowth += 0.0001;
-                    //kat.Content = ("Angle: " + angleGrowth);
-                    buildLines();
-                    updateBitmap();
+                    ObjectRepository.PagePoroze.angleGrowth += 0.0001;
+                    buildLines(ObjectRepository.MainPage.states, ObjectRepository.MainPage.lines);
+                    updateBitmap(mapabitowa, ObjectRepository.MainPage.lines);
                 }
                 else if (Keyboard.IsKeyDown(Key.A))
                 {
-                    angleGrowth -= 0.0001;
-                    //kat.Content = ("Angle: " + angleGrowth);
-                    buildLines();
-                    updateBitmap();
+                    ObjectRepository.PagePoroze.angleGrowth -= 0.0001;
+                    buildLines(ObjectRepository.MainPage.states, ObjectRepository.MainPage.lines);
+                    updateBitmap(mapabitowa, ObjectRepository.MainPage.lines);
                 }
                 else if (Keyboard.IsKeyDown(Key.W))
                 {
-                    initAngle += 0.2;
-                    //roz.Content = ("Size: " + initAngle);
-                    buildLines();
-                    updateBitmap();
+                    ObjectRepository.PagePoroze.initAngle += 0.2;
+                    buildLines(ObjectRepository.MainPage.states, ObjectRepository.MainPage.lines);
+                    updateBitmap(mapabitowa, ObjectRepository.MainPage.lines);
                 }
                 else if (Keyboard.IsKeyDown(Key.S))
                 {
-                    initAngle -= 0.2;
-                    //roz.Content = ("Size: " + initAngle);
-                    buildLines();
-                    updateBitmap();
+                    ObjectRepository.PagePoroze.initAngle -= 0.2;
+                    buildLines(ObjectRepository.MainPage.states, ObjectRepository.MainPage.lines);
+                    updateBitmap(mapabitowa, ObjectRepository.MainPage.lines);
                 }
             };
-            buildLines();
-            updateBitmap();
         }
     }
 }
