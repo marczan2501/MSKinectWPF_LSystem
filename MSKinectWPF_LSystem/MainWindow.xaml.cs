@@ -106,6 +106,7 @@ namespace MSKinectWPF_LSystem
         Skeleton[] skeletons;
         SolidColorBrush inactiveBrush = new SolidColorBrush(Colors.Red);
         public int nachylenie = -9;
+        bool isForwardGestureActive = false;
         #endregion
         public MainWindow()
         {
@@ -305,22 +306,54 @@ namespace MSKinectWPF_LSystem
         {
             if (rightHand.Position.X > head.Position.X + 0.45)
             {
-                System.Windows.Forms.SendKeys.SendWait("W");
+                if (!isForwardGestureActive)
+                {
+                    isForwardGestureActive = true;
+                    System.Windows.Forms.SendKeys.SendWait("W");
+                }
+            }
+            else
+            {
+                isForwardGestureActive = false;
             }
 
             if (leftHand.Position.X < head.Position.X - 0.45)
             {
-                System.Windows.Forms.SendKeys.SendWait("S");
+                if (!isForwardGestureActive)
+                {
+                    isForwardGestureActive = true;
+                    System.Windows.Forms.SendKeys.SendWait("S");
+                }
+            }
+            else
+            {
+                isForwardGestureActive = false;
             }
 
             if (rightFoot.Position.X > head.Position.X + 0.45)
             {
-                System.Windows.Forms.SendKeys.SendWait("A");
+                if (!isForwardGestureActive)
+                {
+                    isForwardGestureActive = true;
+                    System.Windows.Forms.SendKeys.SendWait("A");
+                }
+            }
+            else
+            {
+                isForwardGestureActive = false;
             }
 
             if (leftFoot.Position.X < head.Position.X - 0.45)
             {
-                System.Windows.Forms.SendKeys.SendWait("D");
+                if (!isForwardGestureActive)
+                {
+                    isForwardGestureActive = true;
+                    System.Windows.Forms.SendKeys.SendWait("D");
+                }
+            }
+            else
+            {
+                isForwardGestureActive = false;
             }
         }
         void ShowCircles()
